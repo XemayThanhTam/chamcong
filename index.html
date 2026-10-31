@@ -914,7 +914,13 @@ function khoiTaoFB() {
   if (!firebase.apps.length) firebase.initializeApp(CFG.firebase);
   return navigator.serviceWorker.register('firebase-messaging-sw.js').then(function (reg) {
     TB.swReg = reg; TB.msg = firebase.messaging();
-    TB.msg.onMessage(function (p) { var n = (p && (p.notification || p.data)) || {}; toast((n.title || 'Thông báo') + (n.body ? ': ' + n.body : '')); if (S.tab === 'don') veDon(); });
+    // App đang mở trên màn hình: vẫn hiện thông báo của hệ thống (không chỉ dòng chữ trong app)
+    TB.msg.onMessage(function (p) {
+      var n = (p && (p.notification || p.data)) || {};
+      try { TB.swReg.showNotification(n.title || 'Chấm công Thành Tâm', { body: n.body || '', icon: 'icon-192.png', badge: 'icon-192.png' }); } catch (e) { }
+      toast((n.title || 'Thông báo') + (n.body ? ': ' + n.body : ''));
+      if (S.tab === 'don') veDon();
+    });
     return TB.msg;
   });
 }
